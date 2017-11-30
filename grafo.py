@@ -1,10 +1,3 @@
-
-                memoria     agregar vertice     agregar arista  ver si a es conectado con B    sacar vertice    sacar aristas
-ma incidencia      v*e          v*E          v*E                 E                                  v*E          v*e
-ma adyacencia   v²              v²              1                1                                 v²             v²             
-li ayacenciaa   v+e             1               v                v                                v+e            V
-diccio de dic   v+e             1               1                1                                  v               1
-
 class Grafo(object):
 	def __init__(self):
 		self.vertices = {}
@@ -27,8 +20,8 @@ class Grafo(object):
 	def agregar_arista(self, vertice_1, vertice_2,nombre):
 		#Agrega la arista en el vertice si este existe
 		try:
-			self.vertices[vertice_1]= nombre
-			self.vertices[vertice_2]= nombre
+			self.vertices[vertice_1].append(nombre)
+			self.vertices[vertice_2].append(nombre)
 			self.aristas[nombre]= (vertice_1,vertice_2)
 		except KeyError:
 			#Si el vertice no esta en el grafo
@@ -84,3 +77,5 @@ class Grafo(object):
 		except KeyError:
 			#Si el vertice no esta en el grafo
 			return False
+	def arista_en_comun(self,vertice,vertice_2):
+		if son_adyacentes(vertice_1,ver)
