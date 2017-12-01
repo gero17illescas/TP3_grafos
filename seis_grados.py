@@ -42,16 +42,13 @@ def grafo_crear(nombre_archivo):
             actor = linea[0]
 
             grafo.agregar_vertice(actor)
-            for pelicula in linea:
-
-                if pelicula in aristas:
-                    aristas[pelicula].append(actor)
-                else:
-                    aristas[pelicula] = []
+            for pelicula in linea[1:]:
+                aristas[pelicula].append(actor)
     for pelicula in aristas.keys():
         actores  =  aristas[pelicula]
         i = 0
-        while i<len(actores):
+        largo = len(actores)
+        while i<largo:
             aux  =  actores[i]
             i += 1
             for actor in actores:
