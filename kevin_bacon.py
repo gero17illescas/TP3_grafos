@@ -21,7 +21,7 @@ def bacon_number(dataset, actor):
     kbn=-1
     if path:
         kbn=len(path)
-    print("{} tiene un Kevin Bacon Number igual a {}.".format(actor,kbn))
+    print(actor+" tiene un Kevin Bacon Number igual a "+str(kbn)+".")
     
 def bacon_number_mayor_a_6(dataset):
     """
