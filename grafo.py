@@ -10,32 +10,28 @@ class Grafo(object):
         """
         Agrega un vertice al grafo
         """
-        self.vertices[vertice] = []
+        self.vertices[vertice] = {}
  
     def borrar_vertice(self, vertice):
         """
         Remueve el vertice del grafo, si no existe levanta KeyError
         """
-        try:
+        if vertice in self.vertices():
             for key in self.vertices.keys():
-                self.vertices[key].pop(vertice)
+                self.vertices[key].pop(vertice,None)
             self.vertices.pop(vertice)
-        except KeyError:
-            #Si el vertice no esta en el grafo
-            pass
  
     def agregar_arista(self, vertice_1, vertice_2,nombre):
         """
         Agrega la arista en el vertice si este existe
         """
-        try:
-            self.vertices[vertice_1].append(nombre)
-            self.vertices[vertice_2].append(nombre)
-            self.aristas[nombre]= (vertice_1,vertice_2)
-        except KeyError:
-            #Si el vertice no esta en el grafo
-            pass
- 
+        if nombre in self.aristas:
+            self.aristas[nombre].append((vertice_1,vertice_2))
+        else:
+            self.aristas[nombre] = [(vertice_1,vertice_2)]
+        self.vertices[vertice_2][vertice_1]=nombre
+        self.vertices[vertice_1][vertice_2]=nombre
+        
     def borrar_arista(self, arista):
         #Remueve la arista si esta en el grafo
         try:
@@ -63,27 +59,17 @@ class Grafo(object):
             pass
 
     def get_adyacentes(self,vertice):
-            
-        try:
-            lista = []
-            for arista in self.vertices[vertice]:
-                (vertice_1,vertice_2)=self.aristas[arista]
-                if vertice_1 is vertice:
-                    lista.append(vertice_2)
-                else:
-                    lista.append(vertice_1)
-            return lista
-        except KeyError:
-            #Si el vertice no esta en el grafo
-            pass
+        return list(self.vertices[vertice].keys())
 
     def son_adyacentes(self,vertice_1,vertice_2):
         try:
-            for adyacente in get_adyacentes(vertice_1):
+            for adyacente in self.get_adyacentes(vertice_1):
                 if adyacente is vertice_2:
                     return True
             return False
         except KeyError:
             #Si el vertice no esta en el grafo
             return False
-
+    def get_arista(self,v1,v2):
+        return self.vertices[v1][v2]
+            

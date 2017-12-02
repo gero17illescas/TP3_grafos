@@ -1,4 +1,3 @@
-# coding = utf-8
 import csv
 from grafo import Grafo
 
@@ -22,7 +21,7 @@ def bfs (grafo,origen):
         for w in grafo.get_adyacentes(v):
             if w not in visitados:
                 visitados[w] = True
-                q.encolar(w)
+                q.append(w)
     return resultado.sort(key = lambda x : x[1])
 
 def grafo_crear(nombre_archivo):
@@ -35,25 +34,21 @@ def grafo_crear(nombre_archivo):
     POST: Devuelve un grafo creado a partir de estos datos.
     """
     grafo  =  Grafo()
-    with open(nombre_archivo,"r") as csvfile:
+    with open(nombre_archivo,"r",newline='\n') as csvfile:
         actores_csv  =  csv.reader(csvfile)
         aristas = {}
         for linea in actores_csv:
             actor = linea[0]
-
             grafo.agregar_vertice(actor)
-            for pelicula in linea:
-
+            for pelicula in linea[1:]:
                 if pelicula in aristas:
-                    aristas[pelicula].append(actor)
+                    aristas['{}'.format(pelicula)].append('{}'.format(actor))
                 else:
-                    aristas[pelicula] = []
+                    aristas['{}'.format(pelicula)] = ['{}'.format(actor)]
     for pelicula in aristas.keys():
         actores  =  aristas[pelicula]
-        i = 0
-        while i<len(actores):
-            aux  =  actores[i]
-            i += 1
+        while actores:
+            aux  =  actores.pop(0)
             for actor in actores:
                 grafo.agregar_arista(aux,actor,pelicula)
     return grafo
@@ -66,35 +61,34 @@ def camino(grafo, origen, llegada):
     POST: Devuelve una lista ordenada de cadenas (peliculas) para llegar desde
     el origen hasta el final.
     """
-    q  =  [origen]
-    visitados  =  {}
-    padres  =  {origen:None}
-    while q:
-        v  =  q.pop(0)
+    cola = [origen]
+    visitados = {origen:True}
+    padres = {origen:None}
+    camino = []
+    resultado = []
+
+    while cola:
+        v  =  cola.pop(0)
         for w in grafo.get_adyacentes(v):
             if w not in visitados:
                 visitados[w] = True
-                padre[w] = v
-                q.append(w)
+                padres[w] = v
+                cola.append(w)
                 if w  ==  llegada:
                     break
-
-    camino = []
+    if llegada not in padres:
+        return resultado
     h = llegada
-
-    while h is not None:
+    while h:
         camino.insert(0,h)
         h = padres.pop(h)
-
     actor_1  =  camino.pop(0)
-    resultado = []
-
+   
     while camino:
-        actor_2  =  camino.pop(0)
-        pelicula  =  [val for val in grafo.get_vertices[actor_1] if val in grafo.get_vertices[actor_2]]
+        actor_2 = camino.pop(0)
+        pelicula = grafo.get_arista(actor_1,actor_2)
         resultado.append((actor_1,actor_2,pelicula))
         actor_1  =  actor_2
-
     return resultado
 
 
@@ -108,15 +102,17 @@ def actores_a_distancia(grafo, origen, n):
     
     aux  =  bfs(grafo,origen)
     resultado = []
-    for i in range(n):
-        resultado.append(aux[i][0])
+    if aux:
+        for i in range(n):
+            resultado.append(aux[i][0])
     return resultado
 
 def actores_a_mayor_distancia(grafo,origen,n):
     actores = bfs(grafo,origen)
-    for i,(actor,cercania) in enumerate(actores):
-        if cercania < n:
-            actores.pop(i)
+    if actores:
+        for i,(actor,cercania) in enumerate(actores):
+            if cercania < n:
+                actores.pop(i)
     return actores
             
 
@@ -129,8 +125,8 @@ def popularidad(grafo, actor):
         de los adyacentes del actor, multiplicado por su cantidad de peliculas
     """
 
-    lista  =  actores_a_distancia(actor,2)
-    return len(lista)*len(grafo.get_vertices(actor))
+    lista  =  actores_a_distancia(grafo,actor,2)
+    return len(lista)*len(grafo.get_vertices())
 
 def random_walk(grafo,v,pasos,orden):
     if pasos  ==  0:
@@ -164,11 +160,12 @@ def similares(grafo, origen, n):
         resultado.append(aux[i][0])
     
 def estadisticas(grafo):
-    promedio_kbn  =  0
+    return (len(grafo.get_aristas()),len(grafo.get_vertices()))
+def promedio_kbn(grafo):
+    promedio_kbn = 0
     for actor in grafo.get_vertices():
-        promedio_kbn +=  len(camino(grafo,actor,'Kevin Bacon'))
-    promedio_kbn / len(grafo.get_vertices())
-    return (len(grafo.get_aristas),len(grafo.get_vertices),promedio_kbn)
-
+        promedio_kbn +=  len(camino(grafo,'Bacon Kevin',actor))
+    promedio_kbn /= len(grafo.get_vertices())
+    return promedio_kbn
 def pertenece_actor(grafo, actor):
     return actor in grafo.get_vertices()
