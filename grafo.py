@@ -25,12 +25,12 @@ class Grafo(object):
         """
         Agrega la arista en el vertice si este existe
         """
-        if nombre in self.aristas:
+        if not nombre in self.aristas:
+            self.aristas[nombre] = []
             self.aristas[nombre].append((vertice_1,vertice_2))
-        else:
-            self.aristas[nombre] = [(vertice_1,vertice_2)]
-        self.vertices[vertice_2][vertice_1]=nombre
-        self.vertices[vertice_1][vertice_2]=nombre
+        if vertice_1 and vertice_2:
+            self.vertices[vertice_2][vertice_1]=nombre
+            self.vertices[vertice_1][vertice_2]=nombre
         
     def borrar_arista(self, arista):
         #Remueve la arista si esta en el grafo
@@ -61,6 +61,6 @@ class Grafo(object):
         except KeyError:
             #Si el vertice no esta en el grafo
             return False
+    
     def get_arista(self,v1,v2):
         return self.vertices[v1][v2]
-            
