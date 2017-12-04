@@ -1,28 +1,32 @@
 import csv
 from grafo import Grafo
+import random
+PORCENTAJE = 0.09
 
-PORCENTAJE = 0.6
-
-def bfs (grafo,origen):
+def cercanos (grafo,origen):
     """
-    Funcion bfs que devuelve una lista con tuplas, cuyo primero elemento
-    es el vertice, y el segundo es la distancia que este se encuentra al
-    vertice origen
+    Funcion bfs que devuelve una lista con tuplas de vertices y su dis
+    tancia al origen, cuyo primero elemento es el vertice, y el segundo
+    es la distancia que este se encuentra al vertice origen.
+    
+    POST:Devulve una lista.Si devuelve una lista vacia, o el origen no
+    pertenece al grafo, o no exiten adyacentes que se conecten con dicho vertice.
     """
     visitados  =  {}
-    q  =  [origen]
+    cola  =  [origen]
     visitados[origen] = True
     resultado = []
     cont = 0
-    while q:
-        v  =  q.pop(0)
+    while cola:
+        v  =  cola.pop(0)
         resultado.append((v,cont))
         cont +=  1
         for w in grafo.get_adyacentes(v):
             if w not in visitados:
                 visitados[w] = True
-                q.append(w)
-    return resultado.sort(key = lambda x : x[1])
+                cola.append(w)
+    resultado.sort(key = lambda x : x[1])
+    return resultado
 
 def grafo_crear(nombre_archivo):
     """
@@ -100,7 +104,7 @@ def actores_a_distancia(grafo, origen, n):
     POST: Devuelve la lista de cadenas (actores) a n pasos del recibido.
     """    
     
-    aux  =  bfs(grafo,origen)
+    aux  =  cercanos(grafo,origen)
     resultado = []
     if aux:
         for i in range(n):
@@ -108,7 +112,14 @@ def actores_a_distancia(grafo, origen, n):
     return resultado
 
 def actores_a_mayor_distancia(grafo,origen,n):
-    actores = bfs(grafo,origen)
+    """
+    Calcula los actores que se encuentran a una distancia mayor que n del
+    origen ingresado.
+    PRE: Recibe un grafo, origen y un entero n.
+    POST: devuelve una lista de cadenas. Si esta vcai es porque no hay
+    actores mas lejos que N
+    """
+    actores = cercanos(grafo,origen)
     if actores:
         for i,(actor,cercania) in enumerate(actores):
             if cercania < n:
@@ -129,13 +140,12 @@ def popularidad(grafo, actor):
     return len(lista)*len(grafo.get_vertices())
 
 def random_walk(grafo,v,pasos,orden):
-    if pasos  ==  0:
+    if pasos  <=  0:
         return
     orden[v] +=  1
     pasos -=  1
-    
-    for w in grafo.get_adyacentes(v):
-        random_walk(grafo,v,pasos,orden)
+    w = random.choice(grafo.get_adyacentes(v))
+    random_walk(grafo,w ,pasos,orden)
         
 def similares(grafo, origen, n):
     """
@@ -150,22 +160,36 @@ def similares(grafo, origen, n):
     for v in grafo.get_vertices():
         orden[v] = 0
 
-    random_walk(grafo,origen,len(grafo.get_vertices)*PORCENTAJE,orden)
+    random_walk(grafo,origen,len(grafo.get_vertices())*PORCENTAJE,orden)
     aux  =  []
+    resultado = []
     orden.pop(origen)
-    for key,value in diccionario.items():
+    for key,value in orden.items():
         aux.append((key,value))
     aux.sort(key = lambda x: -x[1],reverse = True)
     for i in range(n):
         resultado.append(aux[i][0])
+    return resultado
     
 def estadisticas(grafo):
     return (len(grafo.get_aristas()),len(grafo.get_vertices()))
+
 def promedio_kbn(grafo):
     promedio_kbn = 0
     for actor in grafo.get_vertices():
         promedio_kbn +=  len(camino(grafo,'Bacon Kevin',actor))
     promedio_kbn /= len(grafo.get_vertices())
     return promedio_kbn
+
 def pertenece_actor(grafo, actor):
     return actor in grafo.get_vertices()
+
+def bacon_number_actores(grafo):
+    resultado = []
+    for actor in grafo.get_vertices():
+        path = camino(grafo, 'Bacon Kevin', actor)
+        kbn=-1
+        if path:
+            kbn=len(path)
+        resultado.append(kbn)
+    return resultado

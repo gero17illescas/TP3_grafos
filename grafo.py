@@ -34,29 +34,20 @@ class Grafo(object):
         
     def borrar_arista(self, arista):
         #Remueve la arista si esta en el grafo
-        try:
+        if arista in self.aristas:
             a=self.aristas.pop(arista)
             if a:
                 (vertice_1,vertice_2)=a
                 self.vertices[vertice_1].pop(arista)
                 self.vertices[vertice_2].pop(arista)
-            
-        except KeyError:
-            #Si el vertice no esta en el grafo
-            pass
  
     def get_aristas(self):
         #Devuelve la arista si esta en el grafo, caso contrario None
-        try:
-            return self.aristas
-        except KeyError:
-            pass
+        return self.aristas
+
     def get_vertices(self):
         #Devuelve el vertice si esta en el grafo, caso contrario None
-        try:
-            return self.vertices
-        except KeyError:
-            pass
+        return self.vertices
 
     def get_adyacentes(self,vertice):
         return list(self.vertices[vertice].keys())
