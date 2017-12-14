@@ -33,8 +33,8 @@ class Grafo(object):
             if vertice_2 and vertice_2 not in self.aristas[nombre]:
                 self.aristas[nombre].append(vertice_2)
         if vertice_1 and vertice_2:
-            self.vertices[vertice_2][vertice_1] = True
-            self.vertices[vertice_1][vertice_2] = True
+            self.vertices[vertice_2][vertice_1] = nombre
+            self.vertices[vertice_1][vertice_2] = nombre
 
     def borrar_arista(self, arista):
         #Remueve la arista si esta en el grafo

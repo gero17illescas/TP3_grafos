@@ -40,7 +40,7 @@ def grafo_crear(nombre_archivo):
     """
     grafo = Grafo()
     aristas = grafo.get_aristas()
-    with open(nombre_archivo, "r", newline='\n') as csvfile:
+    with open(nombre_archivo, "r", encoding='utf-8', newline='\n') as csvfile:
         actores_csv = csv.reader(csvfile)
         for linea in actores_csv:
             actor = linea[0]
@@ -51,8 +51,8 @@ def grafo_crear(nombre_archivo):
                     for aux in actores:
                         grafo.agregar_arista(actor, aux, pelicula)
                 else:
-                    aristas[pelicula] = []
-                    aristas[pelicula].append(actor)
+                    aristas[pelicula] = [actor]
+
     return grafo
 
 
@@ -92,7 +92,7 @@ def camino(grafo, origen, llegada):
         h = padres.pop(h)
 
     actor_1 = caminos.pop(0)
-    while camino:
+    while caminos:
         actor_2 = caminos.pop(0)
         pelicula = grafo.get_arista(actor_1, actor_2)
         resultado.append((actor_1, actor_2, pelicula))
