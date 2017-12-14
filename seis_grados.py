@@ -3,7 +3,8 @@ from grafo import Grafo
 import random
 PORCENTAJE = 0.6
 
-def cercanos (grafo,origen):
+
+def cercanos(grafo, origen):
     """
     Funcion bfs que devuelve una lista con tuplas de vertices y su dis
     tancia al origen, cuyo primero elemento es el vertice, y el segundo
@@ -12,20 +13,21 @@ def cercanos (grafo,origen):
     POST:Devulve una lista.Si devuelve una lista vacia, o el origen no
     pertenece al grafo, o no exiten adyacentes que se conecten con dicho vertice.
     """
-    visitados  =  {origen:True}
+    visitados = {origen: True}
     cont = 0
-    cola  =  [(cont,origen)]
-    resultado = [(origen,cont)]
+    cola = [(cont, origen)]
+    resultado = [(origen, cont)]
     while cola:
-        (cont,v) = cola.pop(0)
-        resultado.append((v,cont))
+        (cont, v) = cola.pop(0)
+        resultado.append((v, cont))
         for w in grafo.get_adyacentes(v):
             if w not in visitados:
                 visitados[w] = True
-                cola.append((cont+1,w))
+                cola.append((cont+1, w))
                 
-    resultado.sort(key = lambda x : x[1])
+    resultado.sort(key=lambda x: x[1])
     return resultado
+
 
 def grafo_crear(nombre_archivo):
     """
@@ -36,29 +38,23 @@ def grafo_crear(nombre_archivo):
         que equivalen a: vertice,arista,arista,arista
     POST: Devuelve un grafo creado a partir de estos datos.
     """
-    grafo  =  Grafo()
-    with open(nombre_archivo,"r",newline='\n') as csvfile:
-        actores_csv  =  csv.reader(csvfile)
-        aristas = {}
-        vertices = {}
+    grafo = Grafo()
+    aristas = grafo.get_aristas()
+    with open(nombre_archivo, "r", newline='\n') as csvfile:
+        actores_csv = csv.reader(csvfile)
         for linea in actores_csv:
             actor = linea[0]
             grafo.agregar_vertice(actor)
             for pelicula in linea[1:]:
-                grafo.agregar_arista(actor,None,pelicula)
-                if pelicula in aristas:
-                    aristas[pelicula].append(actor)
+                actores = aristas.get(pelicula)
+                if actores:
+                    for aux in actores:
+                        grafo.agregar_arista(actor, aux, pelicula)
                 else:
-                    aristas[pelicula] = [actor]
-
-    for pelicula in aristas.keys():
-        actores  =  aristas[pelicula]
-        while actores:
-            aux  =  actores.pop(0)
-            for actor in actores:
-                grafo.agregar_arista(aux,actor,pelicula)
-        
+                    aristas[pelicula] = []
+                    aristas[pelicula].append(actor)
     return grafo
+
 
 def camino(grafo, origen, llegada):
     """
@@ -68,23 +64,23 @@ def camino(grafo, origen, llegada):
     POST: Devuelve una lista ordenada de cadenas (peliculas) para llegar desde
     el origen hasta el final.
     """
-    if not (pertenece_actor(grafo,origen) and pertenece_actor(grafo,llegada)):
+    if not (pertenece_actor(grafo, origen) and pertenece_actor(grafo, llegada)):
         return False
 
     cola = [origen]
-    visitados = {origen:True}
-    padres = {origen:None}
-    camino = []
+    visitados = {origen: True}
+    padres = {origen: None}
+    caminos = []
     resultado = []
 
     while cola:
-        v  =  cola.pop(0)
+        v = cola.pop(0)
         for w in grafo.get_adyacentes(v):
             if w not in visitados:
                 visitados[w] = True
                 padres[w] = v
                 cola.append(w)
-                if w  ==  llegada:
+                if w == llegada:
                     break
 
     if llegada not in padres:
@@ -92,15 +88,15 @@ def camino(grafo, origen, llegada):
 
     h = llegada
     while h:
-        camino.insert(0,h)
+        caminos.insert(0, h)
         h = padres.pop(h)
 
-    actor_1  =  camino.pop(0)
+    actor_1 = caminos.pop(0)
     while camino:
-        actor_2 = camino.pop(0)
-        pelicula = grafo.get_arista(actor_1,actor_2)
-        resultado.append((actor_1,actor_2,pelicula))
-        actor_1  =  actor_2
+        actor_2 = caminos.pop(0)
+        pelicula = grafo.get_arista(actor_1, actor_2)
+        resultado.append((actor_1, actor_2, pelicula))
+        actor_1 = actor_2
 
     return resultado
 
@@ -112,21 +108,22 @@ def actores_a_distancia(grafo, origen, n):
     PRE: Recibe el grafo, el actor de origen y el numero deseado.
     POST: Devuelve la lista de cadenas (actores) a n pasos del recibido.
     """    
-    if not pertenece_actor(grafo,origen) or n<0:
+    if not pertenece_actor(grafo, origen) or n < 0:
         return False
-    aux  =  cercanos(grafo,origen)
+    aux = cercanos(grafo, origen)
     resultado = []
     if aux:
         aux.pop(0)
-        i=0
-        while aux[i][1]<=n:
-            if aux[i][1]==n:
+        i = 0
+        while aux[i][1] <= n:
+            if aux[i][1] == n:
                 resultado.append(aux[i][0])
             i += 1
     
     return resultado
 
-def actores_a_mayor_distancia(grafo,origen,n):
+
+def actores_a_mayor_distancia(grafo, origen, n):
     """
     Calcula los actores que se encuentran a una distancia mayor que n del
     origen ingresado.
@@ -134,11 +131,11 @@ def actores_a_mayor_distancia(grafo,origen,n):
     POST: devuelve una lista de cadenas. Si esta vcai es porque no hay
     actores mas lejos que N
     """
-    if not pertenece_actor(grafo,origen) or n<0:
+    if not pertenece_actor(grafo, origen) or n < 0:
         return False
-    actores = cercanos(grafo,origen)
+    actores = cercanos(grafo, origen)
     if actores:
-        for i,(actor,cercania) in enumerate(actores):
+        for i, (actor, cercania) in enumerate(actores):
             if cercania <= n:
                 actores.pop(i)
     return actores
@@ -152,34 +149,36 @@ def popularidad(grafo, actor):
     POST: Devuelve un entero que simboliza la popularidad: todos los adyacentes
         de los adyacentes del actor, multiplicado por su cantidad de peliculas
     """
-    if not pertenece_actor(grafo,actor):
+    if not pertenece_actor(grafo, actor):
         return False
-    lista  =  actores_a_distancia(grafo,actor,2)
+    lista = actores_a_distancia(grafo, actor, 2)
     cont = 0
     for pelicula in grafo.get_aristas():
         for tupla in grafo.aristas[pelicula]:
             if actor in tupla:
-                cont +=1
+                cont += 1
 
     return len(lista)*cont
 
-def random_walk(grafo,origen,pasos,orden):
+
+def random_walk(grafo, origen, pasos, orden):
     """
     Recibe un diccionario orden y de acuerdo a un camino aleatorio guarda
     en el dict la cantidad de veces que pasa por cada vertice.
     """
-    if not pertenece_actor(grafo,origen) or pasos<0:
+    if not pertenece_actor(grafo, origen) or pasos < 0:
         return False
     cola = [origen]
     while cola:
         v = cola.pop(0)
-        if pasos  <=  0:
+        if pasos <= 0:
             return
-        orden[v] +=  1
-        pasos -=  1
+        orden[v] += 1
+        pasos -= 1
         w = random.choice(grafo.get_adyacentes(v))
         cola.append(w)
-        
+
+
 def similares(grafo, origen, n):
     """
     Calcula los n actores mas similares al actor de origen y los devuelve en una
@@ -189,55 +188,58 @@ def similares(grafo, origen, n):
     POST: Devuelve una lista de los n actores no adyacentes mas similares
     al pedido. La lista no debe contener al actor de origen.
     """
-    if not pertenece_actor(grafo,origen) or n<0:
+    if not pertenece_actor(grafo, origen) or n < 0:
             return False
-    orden  =  {}
+    orden = {}
     for v in grafo.get_vertices():
         orden[v] = 0
 
-    random_walk(grafo,origen,len(grafo.get_vertices())*PORCENTAJE,orden)
-    aux  =  []
+    random_walk(grafo, origen, len(grafo.get_vertices())*PORCENTAJE, orden)
+    aux = []
     resultado = []
     orden.pop(origen)
-    for key,value in orden.items():
-        aux.append((key,value))
-    aux.sort(key = lambda x: x[1],reverse = True)
+    for key, value in orden.items():
+        aux.append((key, value))
+    aux.sort(key=lambda x: x[1], reverse=True)
     for i in range(n):
         resultado.append(aux[i][0])
     return resultado
-    
+
+
 def estadisticas(grafo):
     """
     Devuelve una tupla en la que la primer componente es la cantida de
     aristas que tiene el grafo, y la segunda la cantidad e vertices.
     """
-    return (len(grafo.get_aristas()),len(grafo.get_vertices()))
+    return len(grafo.get_aristas()), len(grafo.get_vertices())
+
 
 def promedio_kbn(grafo):
-    promedio_kbn = 0
+    promedios_kbn = 0
     cant_actores = len(grafo.get_vertices())
     for actor in grafo.get_vertices():
-        aux = len(camino(grafo,'Bacon Kevin',actor))
+        aux = len(camino(grafo, 'Bacon Kevin', actor))
         if aux:
-            promedio_kbn += aux
+            promedios_kbn += aux
         else:
             cant_actores -= 1
-    promedio_kbn /= cant_actores
-    return promedio_kbn
+    promedios_kbn /= cant_actores
+    return promedios_kbn
+
 
 def pertenece_actor(grafo, actor):
     """
     Devuleve un bool segun si el actor esta en el grafo o no
     """
-    return actor in grafo.get_vertices()
+    return grafo.vertices.get(actor)
+
 
 def bacon_number_actores(grafo):
     resultado = []
     for actor in grafo.get_vertices():
         path = camino(grafo, 'Bacon Kevin', actor)
-        kbn=-1
+        kbn =-1
         if path:
-            kbn=len(path)
+            kbn = len(path)
         resultado.append(kbn)
     return resultado
-
